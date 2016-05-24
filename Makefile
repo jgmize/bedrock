@@ -17,6 +17,7 @@ DB ?= ${PWD}/bedrock.db
 ENV_FILE ?= .env
 SERVE_PORT ?= 8000
 DOCKER_RUN_ARGS ?= --env-file ${ENV_FILE} -e SSLIFY_DISABLE=True -v ${DB}\:/app/bedrock.db -v ${GIT_DIR}\:/app/.git -w /app
+GULP_ARGS ?= --env-file ${ENV_FILE} -e SSLIFY_DISABLE=True -v ${pwd}\:/app -w /app
 CONTAINER_ID ?= $(shell docker ps | grep ${DEV_IMAGE} | head -n 1 | awk '{print $$1}')
 CODE_CONTAINER_ID ?= $(shell docker ps | grep ${CODE_IMAGE} | head -n 1 | awk '{print $$1}')
 DEIS_APPLICATION ?= bedrock-demo-jgmize
@@ -25,6 +26,9 @@ env:
 	@if [[ ! -e ${ENV_FILE} ]]; then \
 		sed -e s/DISABLE_SSL=False/DISABLE_SSL=True/ .bedrock_demo_env > ${ENV_FILE}; \
 	fi
+
+gulp: env
+	docker run ${DOCKER_RUN_ARGS} -p "${SERVE_PORT}:${SERVE_PORT}" ${DEV_IMAGE} gulp
 
 devserver: env
 	docker run ${DOCKER_RUN_ARGS} -p "${SERVE_PORT}:${SERVE_PORT}" ${DEV_IMAGE} ./manage.py runserver 0.0.0.0\:${SERVE_PORT}
