@@ -205,9 +205,6 @@ def latest_sysreq(request, channel, product):
 
 def releases_index(request, product):
     releases = {}
-    esr_major_versions = range(
-        10, int(firefox_desktop.latest_version().split('.')[0]), 7)
-
     if product == 'Firefox':
         major_releases = firefox_desktop.firefox_history_major_releases
         minor_releases = firefox_desktop.firefox_history_stability_releases
@@ -219,10 +216,9 @@ def releases_index(request, product):
         major_version = float(re.findall(r'^\d+\.\d+', release)[0])
         # The version numbering scheme of Firefox changes sometimes. The second
         # number has not been used since Firefox 4, then reintroduced with
-        # Firefox ESR 24 (Bug 870540). On this index page, 24.1.x should be
-        # fallen under 24.0. This pattern is a tricky part.
-        converter = '%g' if int(major_version) in esr_major_versions else '%s'
-        major_pattern = r'^' + re.escape(converter % round(major_version, 1))
+        # Firefox ESR 24 (Bug 870540). On this index page, 24.1.x should fall
+        # under 24.0.
+        major_pattern = r'^' + re.escape('%g' % round(major_version, 1))
         releases[major_version] = {
             'major': release,
             'minor': sorted(filter(lambda x: re.findall(major_pattern, x),
